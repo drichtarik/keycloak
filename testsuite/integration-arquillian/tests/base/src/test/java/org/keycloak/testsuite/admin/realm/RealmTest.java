@@ -31,6 +31,8 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.events.log.JBossLoggingEventListenerProviderFactory;
 import org.keycloak.models.Constants;
+import org.keycloak.models.jpa.entities.RealmAttributeEntity;
+import org.keycloak.models.jpa.entities.RealmAttributes;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.protocol.saml.SamlProtocol;
 import org.keycloak.representations.adapters.action.GlobalRequestResult;
@@ -68,13 +70,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -446,10 +442,16 @@ public class RealmTest extends AbstractAdminTest {
     public void updateRealmAttributes() {
         // first change
         RealmRepresentation rep = new RealmRepresentation();
+
+        List<String> webAuthnPolicyAcceptableAaguids = new ArrayList<>();
+        webAuthnPolicyAcceptableAaguids.add("aaguid1");
+        webAuthnPolicyAcceptableAaguids.add("aaguid2");
+
         rep.setAttributes(new HashMap<>());
         rep.getAttributes().put("foo1", "bar1");
         rep.getAttributes().put("foo2", "bar2");
 
+        rep.setWebAuthnPolicyAcceptableAaguids(webAuthnPolicyAcceptableAaguids);
         rep.setBruteForceProtected(true);
         rep.setDisplayName("dn1");
 
@@ -457,11 +459,12 @@ public class RealmTest extends AbstractAdminTest {
         assertAdminEvents.assertEvent(realmId, OperationType.UPDATE, Matchers.nullValue(String.class), rep, ResourceType.REALM);
 
         rep = realm.toRepresentation();
-
         assertEquals("bar1", rep.getAttributes().get("foo1"));
         assertEquals("bar2", rep.getAttributes().get("foo2"));
         assertTrue(rep.isBruteForceProtected());
         assertEquals("dn1", rep.getDisplayName());
+
+        assertEquals(webAuthnPolicyAcceptableAaguids, rep.getAttributes().get(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS));
 
         // second change
         rep.setBruteForceProtected(false);

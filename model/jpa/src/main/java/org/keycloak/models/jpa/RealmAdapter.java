@@ -1035,7 +1035,9 @@ public class RealmAdapter implements RealmModel, JpaModel<RealmEntity> {
             String acceptableAaguidsString = String.join(",", acceptableAaguids);
             setAttribute(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS, acceptableAaguidsString);
         } else {
-            setAttribute(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS, "");
+            removeAttribute(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS);
+            //realm.getAttributes().remove(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS);
+            //setAttribute(RealmAttributes.WEBAUTHN_POLICY_ACCEPTABLE_AAGUIDS, "");
         }
     }
 
