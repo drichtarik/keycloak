@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import com.webauthn4j.WebAuthnManager;
+import com.webauthn4j.data.RegistrationData;
+import com.webauthn4j.data.RegistrationParameters;
+import com.webauthn4j.data.RegistrationRequest;
 import org.jboss.logging.Logger;
 import org.keycloak.WebAuthnConstants;
 import org.keycloak.authentication.CredentialRegistrator;
@@ -44,9 +48,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.WebAuthnPolicy;
 
-import com.webauthn4j.converter.util.CborConverter;
-import com.webauthn4j.converter.util.JsonConverter;
-import com.webauthn4j.data.WebAuthnRegistrationContext;
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
 import com.webauthn4j.data.attestation.statement.AttestationStatement;
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier;
@@ -55,8 +56,6 @@ import com.webauthn4j.data.client.challenge.Challenge;
 import com.webauthn4j.data.client.challenge.DefaultChallenge;
 import com.webauthn4j.server.ServerProperty;
 import com.webauthn4j.util.exception.WebAuthnException;
-import com.webauthn4j.validator.WebAuthnRegistrationContextValidationResponse;
-import com.webauthn4j.validator.WebAuthnRegistrationContextValidator;
 import com.webauthn4j.validator.attestation.statement.androidkey.AndroidKeyAttestationStatementValidator;
 import com.webauthn4j.validator.attestation.statement.androidsafetynet.AndroidSafetyNetAttestationStatementValidator;
 import com.webauthn4j.validator.attestation.statement.none.NoneAttestationStatementValidator;
@@ -196,9 +195,10 @@ public class WebAuthnRegister implements RequiredActionProvider, CredentialRegis
         boolean isUserVerificationRequired = policy.getUserVerificationRequirement().equals(WebAuthnConstants.OPTION_REQUIRED);
 
         try {
-            WebAuthnRegistrationContext registrationContext = new WebAuthnRegistrationContext(clientDataJSON, attestationObject, serverProperty, isUserVerificationRequired);
-            WebAuthnRegistrationContextValidator webAuthnRegistrationContextValidator = createWebAuthnRegistrationContextValidator();
-            WebAuthnRegistrationContextValidationResponse response = webAuthnRegistrationContextValidator.validate(registrationContext);
+            RegistrationParameters registrationParameters = new RegistrationParameters(serverProperty, isUserVerificationRequired);
+            RegistrationRequest registrationRequest = new RegistrationRequest(attestationObject, clientDataJSON);
+            WebAuthnManager webAuthnManager = createWebAuthnRegistrationContextValidator();
+            RegistrationData response = webAuthnManager.validate(registrationRequest, registrationParameters);
 
             showInfoAfterWebAuthnApiCreate(response);
 
@@ -236,8 +236,8 @@ public class WebAuthnRegister implements RequiredActionProvider, CredentialRegis
         }
     }
 
-    private WebAuthnRegistrationContextValidator createWebAuthnRegistrationContextValidator() {
-        return new WebAuthnRegistrationContextValidator(
+    private WebAuthnManager createWebAuthnRegistrationContextValidator() {
+        return new WebAuthnManager(
                 Arrays.asList(
                         new NoneAttestationStatementValidator(),
                         new PackedAttestationStatementValidator(),
@@ -247,9 +247,7 @@ public class WebAuthnRegister implements RequiredActionProvider, CredentialRegis
                         new FIDOU2FAttestationStatementValidator()
                 ), this.certPathtrustValidator,
                 new DefaultECDAATrustworthinessValidator(),
-                new DefaultSelfAttestationTrustworthinessValidator(),
-                new JsonConverter(),
-                new CborConverter());
+                new DefaultSelfAttestationTrustworthinessValidator());
     }
 
     private String stringifySignatureAlgorithms(List<String> signatureAlgorithmsList) {
@@ -295,7 +293,7 @@ public class WebAuthnRegister implements RequiredActionProvider, CredentialRegis
         return sb.toString();
     }
 
-    private void showInfoAfterWebAuthnApiCreate(WebAuthnRegistrationContextValidationResponse response) {
+    private void showInfoAfterWebAuthnApiCreate(RegistrationData response) {
         AttestedCredentialData attestedCredentialData = response.getAttestationObject().getAuthenticatorData().getAttestedCredentialData();
         AttestationStatement attestationStatement = response.getAttestationObject().getAttestationStatement();
         logger.debugv("createad key's algorithm = {0}", String.valueOf(attestedCredentialData.getCOSEKey().getAlgorithm().getValue()));
@@ -303,7 +301,7 @@ public class WebAuthnRegister implements RequiredActionProvider, CredentialRegis
         logger.debugv("attestation format = {0}", attestationStatement.getFormat());
     }
 
-    private void checkAcceptedAuthenticator(WebAuthnRegistrationContextValidationResponse response, WebAuthnPolicy policy) throws Exception {
+    private void checkAcceptedAuthenticator(RegistrationData response, WebAuthnPolicy policy) throws Exception {
         String aaguid = response.getAttestationObject().getAuthenticatorData().getAttestedCredentialData().getAaguid().toString();
         List<String> acceptableAaguids = policy.getAcceptableAaguids();
         boolean isAcceptedAuthenticator = false;
