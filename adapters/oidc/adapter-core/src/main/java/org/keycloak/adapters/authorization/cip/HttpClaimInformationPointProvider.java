@@ -164,9 +164,10 @@ public class HttpClaimInformationPointProvider implements ClaimInformationPointP
 
                 if (value instanceof Collection) {
                     Collection values = Collection.class.cast(value);
+                    Iterator iterator = values.iterator();
 
-                    for (Object item : values) {
-                        headerValues.addAll(PlaceHolders.resolve(item.toString(), httpFacade));
+                    while (iterator.hasNext()) {
+                        headerValues.addAll(PlaceHolders.resolve(iterator.next().toString(), httpFacade));
                     }
                 } else {
                     headerValues.addAll(PlaceHolders.resolve(value.toString(), httpFacade));
@@ -191,9 +192,10 @@ public class HttpClaimInformationPointProvider implements ClaimInformationPointP
 
                 if (value instanceof Collection) {
                     Collection values = Collection.class.cast(value);
+                    Iterator iterator = values.iterator();
 
-                    for (Object item : values) {
-                        paramValues.addAll(PlaceHolders.resolve(item.toString(), httpFacade));
+                    while (iterator.hasNext()) {
+                        paramValues.addAll(PlaceHolders.resolve(iterator.next().toString(), httpFacade));
                     }
                 } else {
                     paramValues.addAll(PlaceHolders.resolve(value.toString(), httpFacade));

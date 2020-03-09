@@ -28,6 +28,7 @@ import org.keycloak.common.enums.RelativeUrlsUsed;
 import org.keycloak.common.enums.SslRequired;
 import org.keycloak.common.util.PemUtils;
 import org.keycloak.enums.TokenStore;
+import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 public class KeycloakDeploymentBuilderTest {
 
     @Test
-    public void load() {
+    public void load() throws Exception {
         KeycloakDeployment deployment = KeycloakDeploymentBuilder.build(getClass().getResourceAsStream("/keycloak.json"));
         assertEquals("demo", deployment.getRealm());
         assertEquals("customer-portal", deployment.getResourceName());
@@ -80,7 +81,7 @@ public class KeycloakDeploymentBuilderTest {
     }
 
     @Test
-    public void loadNoClientCredentials() {
+    public void loadNoClientCredentials() throws Exception {
         KeycloakDeployment deployment = KeycloakDeploymentBuilder.build(getClass().getResourceAsStream("/keycloak-no-credentials.json"));
         assertEquals(ClientIdAndSecretCredentialsProvider.PROVIDER_ID, deployment.getClientAuthenticator().getId());
 
@@ -90,13 +91,13 @@ public class KeycloakDeploymentBuilderTest {
     }
 
     @Test
-    public void loadJwtCredentials() {
+    public void loadJwtCredentials() throws Exception {
         KeycloakDeployment deployment = KeycloakDeploymentBuilder.build(getClass().getResourceAsStream("/keycloak-jwt.json"));
         assertEquals(JWTClientCredentialsProvider.PROVIDER_ID, deployment.getClientAuthenticator().getId());
     }
 
     @Test
-    public void loadSecretJwtCredentials() {
+    public void loadSecretJwtCredentials() throws Exception {
         KeycloakDeployment deployment = KeycloakDeploymentBuilder.build(getClass().getResourceAsStream("/keycloak-secret-jwt.json"));
         assertEquals(JWTClientSecretCredentialsProvider.PROVIDER_ID, deployment.getClientAuthenticator().getId());
     }

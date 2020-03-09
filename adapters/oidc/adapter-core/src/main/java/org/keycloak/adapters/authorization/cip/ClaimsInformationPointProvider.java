@@ -19,6 +19,7 @@ package org.keycloak.adapters.authorization.cip;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,9 +51,10 @@ public class ClaimsInformationPointProvider implements ClaimInformationPointProv
             if (claimValue instanceof String) {
                 values = getValues(claimValue.toString(), httpFacade);
             } else if (claimValue instanceof Collection) {
+                Iterator iterator = Collection.class.cast(claimValue).iterator();
 
-                for (Object value : Collection.class.cast(claimValue)) {
-                    List<String> resolvedValues = getValues(value.toString(), httpFacade);
+                while (iterator.hasNext()) {
+                    List<String> resolvedValues = getValues(iterator.next().toString(), httpFacade);
 
                     if (!resolvedValues.isEmpty()) {
                         values.addAll(resolvedValues);
