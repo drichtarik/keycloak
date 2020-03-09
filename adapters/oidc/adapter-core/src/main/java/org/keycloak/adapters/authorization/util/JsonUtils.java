@@ -18,6 +18,7 @@ package org.keycloak.adapters.authorization.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,8 +37,10 @@ public class JsonUtils {
         List<String> values = new ArrayList<>();
 
         if (jsonNode.isArray()) {
+            Iterator<JsonNode> iterator = jsonNode.iterator();
 
-            for (JsonNode node : jsonNode) {
+            while (iterator.hasNext()) {
+                JsonNode node = iterator.next();
                 String value;
 
                 if (node.isObject()) {

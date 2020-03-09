@@ -63,7 +63,7 @@ public class BearerTokenRequestAuthenticator {
 
     public AuthOutcome authenticate(HttpFacade exchange)  {
         List<String> authHeaders = exchange.getRequest().getHeaders("Authorization");
-        if (authHeaders == null || authHeaders.isEmpty()) {
+        if (authHeaders == null || authHeaders.size() == 0) {
             challenge = challengeResponse(exchange, OIDCAuthenticationError.Reason.NO_BEARER_TOKEN, null, null);
             return AuthOutcome.NOT_ATTEMPTED;
         }
@@ -71,13 +71,13 @@ public class BearerTokenRequestAuthenticator {
         tokenString = null;
         for (String authHeader : authHeaders) {
             String[] split = authHeader.trim().split("\\s+");
-            if (split.length != 2) continue;
+            if (split == null || split.length != 2) continue;
             if (split[0].equalsIgnoreCase("Bearer")) {
                 tokenString = split[1];
 
                 log.debugf("Found [%d] values in authorization header, selecting the first value for Bearer.", (Integer) authHeaders.size());
                 break;
-            }
+            };
         }
 
         if (tokenString == null) {
@@ -119,7 +119,7 @@ public class BearerTokenRequestAuthenticator {
         }
         surrogate = null;
         if (verifyCaller) {
-            if (token.getTrustedCertificates() == null || token.getTrustedCertificates().isEmpty()) {
+            if (token.getTrustedCertificates() == null || token.getTrustedCertificates().size() == 0) {
                 log.warn("No trusted certificates in token");
                 challenge = clientCertChallenge();
                 return AuthOutcome.FAILED;
