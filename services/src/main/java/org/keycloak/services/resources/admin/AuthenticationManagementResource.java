@@ -571,16 +571,15 @@ public class AuthenticationManagementResource {
     }
 
     /**
-     * Update authentication executions of a flow
-     *
+     * Update authentication executions or a name of a flow
      * @param flowAlias Flow alias
-     * @param rep
+     * @param rep AuthenticationExecutionInfoRepresentation
      */
     @Path("/flows/{flowAlias}/executions")
     @PUT
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateExecutions(@PathParam("flowAlias") String flowAlias, AuthenticationExecutionInfoRepresentation rep) {
+    public Response updateExecutions(@PathParam("flowAlias") String flowAlias, AuthenticationExecutionInfoRepresentation rep) {
         auth.realm().requireManageRealm();
 
         AuthenticationFlowModel flow = realm.getFlowByAlias(flowAlias);
@@ -599,7 +598,20 @@ public class AuthenticationManagementResource {
             model.setRequirement(AuthenticationExecutionModel.Requirement.valueOf(rep.getRequirement()));
             realm.updateAuthenticatorExecution(model);
             adminEvent.operation(OperationType.UPDATE).resource(ResourceType.AUTH_EXECUTION).resourcePath(session.getContext().getUri()).representation(rep).success();
+            return null;
         }
+
+        AuthenticationFlowModel checkFlow = realm.getFlowByAlias(rep.getDisplayName());
+
+        if (checkFlow != null ) {
+            return ErrorResponse.exists("New flow alias name already exists");
+        } else {
+            checkFlow = realm.getAuthenticationFlowById(rep.getFlowId());
+            checkFlow.setAlias(rep.getDisplayName());
+            realm.updateAuthenticationFlow(checkFlow);
+        }
+
+        return null;
     }
 
     /**
