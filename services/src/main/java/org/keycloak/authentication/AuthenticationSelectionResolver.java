@@ -209,7 +209,7 @@ class AuthenticationSelectionResolver {
             if (requiredExecution == null) return false;
 
             // Don't add already processed executions
-            if (flow.isProcessed(requiredExecution)) {
+            if (flow.isProcessed(requiredExecution) || flowModel.getProviderId() != "form-flow") {
                 return false;
             }
 
