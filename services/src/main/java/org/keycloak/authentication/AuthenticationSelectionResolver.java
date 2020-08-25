@@ -214,7 +214,7 @@ class AuthenticationSelectionResolver {
             }
 
             // Recursively add credentials from required execution
-            if (requiredExecution.isAuthenticatorFlow()) {
+            if (requiredExecution.isAuthenticatorFlow() && flowModel.getProviderId() == "form-flow") {
                 return addAllExecutionsFromSubflow(processor, requiredExecution.getFlowId(), typeAuthExecMap, nonCredentialExecutions);
             } else {
                 addSimpleAuthenticationExecution(processor, requiredExecution, typeAuthExecMap, nonCredentialExecutions);
