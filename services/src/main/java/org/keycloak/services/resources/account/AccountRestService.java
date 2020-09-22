@@ -185,6 +185,20 @@ public class AccountRestService {
                 return ErrorResponse.error(Messages.READ_ONLY_USERNAME, Response.Status.BAD_REQUEST);
             }
 
+            boolean firstNameChanged = userRep.getFirstName() != null && !userRep.getFirstName().equals(user.getFirstName());
+            if (firstNameChanged) {
+                String oldFirstName = user.getFirstName();
+                user.setFirstName(userRep.getFirstName());
+                event.detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, userRep.getFirstName());
+            }
+
+            boolean lastNameChanged = userRep.getLastName() != null && !userRep.getLastName().equals(user.getLastName());
+            if (lastNameChanged) {
+                String oldLastName = user.getLastName();
+                user.setLastName(userRep.getLastName());
+                event.detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, userRep.getLastName());
+            }
+
             boolean emailChanged = userRep.getEmail() != null && !userRep.getEmail().equals(user.getEmail());
             if (emailChanged && !realm.isDuplicateEmailsAllowed()) {
                 UserModel existing = session.users().getUserByEmail(userRep.getEmail(), realm);
@@ -210,9 +224,6 @@ public class AccountRestService {
                     user.setUsername(userRep.getEmail());
                 }
             }
-
-            user.setFirstName(userRep.getFirstName());
-            user.setLastName(userRep.getLastName());
 
             if (userRep.getAttributes() != null) {
                 Set<String> attributeKeys = new HashSet<>(user.getAttributes().keySet());

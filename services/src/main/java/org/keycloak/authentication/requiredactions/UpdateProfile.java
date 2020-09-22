@@ -99,8 +99,21 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
         }
 
-        user.setFirstName(formData.getFirst("firstName"));
-        user.setLastName(formData.getFirst("lastName"));
+        String firstName = formData.getFirst("firstName");
+        String oldFirstName = user.getFirstName();
+        boolean firstNameChanged = oldFirstName != null ? !oldFirstName.equals(firstName) : firstName != null;
+        if (firstNameChanged) {
+            user.setFirstName(formData.getFirst("firstName"));
+            event.detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, firstName);
+        }
+
+        String lastName = formData.getFirst("lastName");
+        String oldLastName = user.getLastName();
+        boolean lastNameChanged = oldLastName != null ? !oldLastName.equals(lastName) : lastName != null;
+        if (lastNameChanged) {
+            user.setLastName(formData.getFirst("lastName"));
+            event.detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, lastName);
+        }
 
         String email = formData.getFirst("email");
 
