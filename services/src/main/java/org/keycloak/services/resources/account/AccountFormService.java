@@ -371,8 +371,28 @@ public class AccountFormService extends AbstractSecuredLocalService {
             updateUsername(formData.getFirst("username"), user, session);
             updateEmail(formData.getFirst("email"), user, session, event);
 
-            user.setFirstName(formData.getFirst("firstName"));
-            user.setLastName(formData.getFirst("lastName"));
+            String firstName = formData.getFirst("firstName");
+            String oldFirstName = user.getFirstName();
+            boolean firstNameChanged = oldFirstName != null ? !oldFirstName.equals(firstName) : firstName != null;
+            if (firstNameChanged) {
+                user.setFirstName(formData.getFirst("firstName"));
+            }
+            if (firstNameChanged) {
+                event.clone().event(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, firstName).success();
+            }
+
+            String lastName = formData.getFirst("lastName");
+            String oldLastName = user.getLastName();
+            boolean lastNameChanged = oldLastName != null ? !oldLastName.equals(lastName) : lastName != null;
+            if (lastNameChanged) {
+                user.setLastName(formData.getFirst("lastName"));
+            }
+            if (lastNameChanged) {
+                event.clone().event(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, lastName).success();
+            }
+
+            //user.setFirstName(formData.getFirst("firstName"));
+            //user.setLastName(formData.getFirst("lastName"));
 
             AttributeFormDataProcessor.process(formData, realm, user);
 
@@ -1102,6 +1122,10 @@ public class AccountFormService extends AbstractSecuredLocalService {
             }
             user.setUsername(email);
         }
+    }
+
+    private void updateFirstName() {
+
     }
 
     private void csrfCheck(final MultivaluedMap<String, String> formData) {

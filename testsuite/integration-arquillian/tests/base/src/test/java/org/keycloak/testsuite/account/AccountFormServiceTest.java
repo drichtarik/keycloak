@@ -707,6 +707,8 @@ public class AccountFormServiceTest extends AbstractTestRealmKeycloakTest {
         Assert.assertEquals("new@email.com", profilePage.getEmail());
 
         events.expectAccount(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, "test-user@localhost").detail(Details.UPDATED_EMAIL, "new@email.com").assertEvent();
+        events.expectAccount(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, "Tom").detail(Details.UPDATED_FIRST_NAME, "New first").assertEvent();
+        events.expectAccount(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, "Brady").detail(Details.UPDATED_LAST_NAME, "New last").assertEvent();
         events.expectAccount(EventType.UPDATE_PROFILE).assertEvent();
 
         // reset user for other tests

@@ -211,8 +211,21 @@ public class AccountRestService {
                 }
             }
 
-            user.setFirstName(userRep.getFirstName());
-            user.setLastName(userRep.getLastName());
+            boolean firstNameChanged = userRep.getFirstName() != null && !userRep.getFirstName().equals(user.getFirstName());
+            if (firstNameChanged) {
+                String oldFirstName = user.getFirstName();
+                user.setFirstName(userRep.getFirstName());
+                event.clone().event(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, userRep.getFirstName()).success();
+            }
+            boolean lastNameChanged = userRep.getFirstName() != null && !userRep.getLastName().equals(user.getLastName());
+            if (lastNameChanged) {
+                String oldLastName = user.getLastName();
+                user.setLastName(userRep.getLastName());
+                event.clone().event(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, userRep.getLastName()).success();
+
+            }
+            //user.setFirstName(userRep.getFirstName());
+            //user.setLastName(userRep.getLastName());
 
             if (userRep.getAttributes() != null) {
                 Set<String> attributeKeys = new HashSet<>(user.getAttributes().keySet());

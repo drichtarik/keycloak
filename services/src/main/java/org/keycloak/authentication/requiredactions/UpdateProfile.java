@@ -99,8 +99,19 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
         }
 
-        user.setFirstName(formData.getFirst("firstName"));
-        user.setLastName(formData.getFirst("lastName"));
+        String firstName = formData.getFirst("firstName");
+        String oldFirstName = user.getFirstName();
+        boolean firstNameChanged = oldFirstName != null ? !oldFirstName.equals(firstName) : firstName != null;
+        if (firstNameChanged) {
+            user.setFirstName(formData.getFirst("firstName"));
+        }
+
+        String lastName = formData.getFirst("lastName");
+        String oldLastName = user.getLastName();
+        boolean lastNameChanged = oldLastName != null ? !oldLastName.equals(lastName) : lastName != null;
+        if (lastNameChanged) {
+            user.setLastName(formData.getFirst("lastName"));
+        }
 
         String email = formData.getFirst("email");
 
@@ -130,6 +141,12 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
         if (emailChanged) {
             event.clone().event(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, email).success();
+        }
+        if (firstNameChanged) {
+            event.clone().event(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, firstName).success();
+        }
+        if (lastNameChanged) {
+            event.clone().event(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, lastName).success();
         }
         context.success();
 
