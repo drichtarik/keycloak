@@ -82,6 +82,8 @@ public class AppInitiatedActionUpdateProfileTest extends AbstractAppInitiatedAct
 
         updateProfilePage.update("New first", "New last", "new@email.com", "test-user@localhost");
 
+        events.expectRequiredAction(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, "Tom").detail(Details.UPDATED_FIRST_NAME, "New first").assertEvent();
+        events.expectRequiredAction(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, "Brady").detail(Details.UPDATED_LAST_NAME, "New last").assertEvent();
         events.expectRequiredAction(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, "test-user@localhost").detail(Details.UPDATED_EMAIL, "new@email.com").assertEvent();
         events.expectRequiredAction(EventType.UPDATE_PROFILE).assertEvent();
         events.expectLogin().assertEvent();
@@ -111,6 +113,8 @@ public class AppInitiatedActionUpdateProfileTest extends AbstractAppInitiatedAct
         updateProfilePage.update("New first", "New last", "new@email.com", "test-user@localhost");
 
         events.expectLogin().assertEvent();
+        events.expectRequiredAction(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, "Tom").detail(Details.UPDATED_FIRST_NAME, "New first").assertEvent();
+        events.expectRequiredAction(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, "Brady").detail(Details.UPDATED_LAST_NAME, "New last").assertEvent();
         events.expectRequiredAction(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, "test-user@localhost").detail(Details.UPDATED_EMAIL, "new@email.com").assertEvent();
         events.expectRequiredAction(EventType.UPDATE_PROFILE).assertEvent();
 
@@ -157,6 +161,8 @@ public class AppInitiatedActionUpdateProfileTest extends AbstractAppInitiatedAct
 
         updateProfilePage.update("New first", "New last", "john-doh@localhost", "new");
 
+        events.expectLogin().event(EventType.UPDATE_FIRST_NAME).detail(Details.UPDATED_FIRST_NAME, "New first").user(userId).session(Matchers.nullValue(String.class)).removeDetail(Details.CONSENT).assertEvent();
+        events.expectLogin().event(EventType.UPDATE_LAST_NAME).detail(Details.UPDATED_LAST_NAME, "New last").user(userId).session(Matchers.nullValue(String.class)).removeDetail(Details.CONSENT).assertEvent();
         events.expectLogin()
                 .event(EventType.UPDATE_PROFILE)
                 .detail(Details.USERNAME, "john-doh@localhost")
@@ -240,8 +246,6 @@ public class AppInitiatedActionUpdateProfileTest extends AbstractAppInitiatedAct
         Assert.assertEquals("", updateProfilePage.getEmail());
 
         Assert.assertEquals("Please specify email.", updateProfilePage.getError());
-
-        events.assertEmpty();
     }
 
     @Test
@@ -330,8 +334,6 @@ public class AppInitiatedActionUpdateProfileTest extends AbstractAppInitiatedAct
         Assert.assertEquals("keycloak-user@localhost", updateProfilePage.getEmail());
 
         Assert.assertEquals("Email already exists.", updateProfilePage.getError());
-
-        events.assertEmpty();
     }
 
     @Test

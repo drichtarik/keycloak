@@ -361,6 +361,13 @@ public class AccountFormService extends AbstractSecuredLocalService {
 
         UserModel user = auth.getUser();
         AttributeUserProfile updatedProfile = AttributeFormDataProcessor.toUserProfile(formData);
+
+        String oldFirstName = user.getFirstName();
+        String newFirstName = updatedProfile.getAttributes().getFirstAttribute(UserModel.FIRST_NAME);
+
+        String oldLastName = user.getLastName();
+        String newLastName = updatedProfile.getAttributes().getFirstAttribute(UserModel.LAST_NAME);
+
         String oldEmail = user.getEmail();
         String newEmail = updatedProfile.getAttributes().getFirstAttribute(UserModel.EMAIL);
 
@@ -391,6 +398,12 @@ public class AccountFormService extends AbstractSecuredLocalService {
             return account.setError(Response.Status.BAD_REQUEST, Messages.READ_ONLY_USER).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
         }
 
+        if (result.hasAttributeChanged(UserModel.FIRST_NAME)) {
+            event.clone().event(EventType.UPDATE_FIRST_NAME).detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, newFirstName).success();
+        }
+        if (result.hasAttributeChanged(UserModel.LAST_NAME)) {
+            event.clone().event(EventType.UPDATE_LAST_NAME).detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, newLastName).success();
+        }
         if (result.hasAttributeChanged(UserModel.EMAIL)) {
             user.setEmailVerified(false);
             event.clone().event(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, newEmail).success();
